@@ -1,0 +1,57 @@
+---
+title: "Places to Visit in Potsdam, Germany"
+author: "Anne Strader"
+date: "April 29, 2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Sightseeing in Potsdam, Germany
+
+This page provides an overview of some sites to visit in Potsdam, Germany. Using the map below (created with leaflet), one can select a site and click on the corresponding link to visit its website for more information.
+
+To understand how I created the map, all R code will be displayed.
+
+First, all necessary R libraries were loaded:
+
+```{r load_libs, echo = TRUE}
+library(leaflet)
+library(dplyr)
+```
+
+Then, I defined a dataframe containing the site names, coordinates (longitude and latitude), site type, and URL:
+
+```{r list_sites, echo = TRUE}
+site.data <- data.frame(
+    name = c("Museum Barberini", "Filmmuseum Potsdam", "Naturkundemuseum Postdam", "Jan Bouman Haus", "Sanssouci Palace", "Charlottenhof Palace", "Belvedere on the Pfingstberg", "Marmorpalais", "Gedenkstätte Lindenstraße", "Gefängnis Leistikowstraße", "Biosphäre Potsdam", "Botanical Garden of the University of Potsdam"),
+    lng = c(13.06153, 13.0578, 13.0508, 13.05924, 13.0385, 13.0255, 13.0590, 13.069, 13.052220, 13.06424, 13.04900, 13.0256),
+    lat = c(52.39527, 52.3953, 52.3959, 52.40329, 52.4042, 52.3956, 52.4188, 52.412, 52.400560, 52.41725, 52.41939, 52.4040),
+    type = c("museum", "museum", "museum", "museum", "castle or palace", "castle or palace", "castle or palace", "castle or palace", "memorial", "memorial", "botanical garden", "botanical garden"),
+    url = c("https://www.museum-barberini.de/de/", "https://www.filmmuseum-potsdam.de/", "https://www.naturkundemuseum-potsdam.de/", "https://jan-bouman-haus.de/", "https://www.spsg.de/en/palaces-gardens/object/sanssouci-palace/", "https://www.spsg.de/schloesser-gaerten/objekt/schloss-charlottenhof/", "https://www.pfingstberg.de/", "https://www.spsg.de/schloesser-gaerten/objekt/marmorpalais/", "https://www.gedenkstaette-lindenstrasse.de/", "https://www.leistikowstrasse-sbg.de/", "https://www.biosphaere-potsdam.de/", "https://www.uni-potsdam.de/de/botanischer-garten/")
+)
+```
+
+To use different marker colors to represent different site types, I created a color palette:
+
+```{r, type_colors, echo = TRUE}
+color.pal <- colorFactor(c("orchid1", "coral", "mediumpurple", "springgreen1"), domain = site.data$type)
+```
+
+I then added the necessary html code to create the link for each location's website:
+
+```{r, links, echo = TRUE}
+site.data <- site.data %>% 
+    mutate(links = paste0('<a href=', url, '>', name, '</a>'))
+```
+
+Finally, I created the map using leaflet. When the reader clicks on a site location, a link to the corresponding website will appear.
+
+```{r, create_map, echo = TRUE}
+leaflet(site.data) %>% 
+    addTiles() %>% 
+    addCircleMarkers(~lng, ~lat, radius = 8, weight = 0.2, fillOpacity = 0.8, color = ~color.pal(type), stroke = FALSE, clusterOptions = markerClusterOptions(), popup = ~links) %>%
+    addLegend("topleft", pal = color.pal, values = ~type, opacity = 1)
+```
